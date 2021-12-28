@@ -1,11 +1,7 @@
 pipeline
 {
-    //agent any 
-    agent 
-	{
-	  label 'nodes'
-	}
-	tools
+    agent any 
+      tools
 	{
         maven "maven3.8.1"
         }
