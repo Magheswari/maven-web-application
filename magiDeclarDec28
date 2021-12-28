@@ -1,0 +1,51 @@
+pipeline
+{
+    agent any 
+	tools
+	{
+        maven "maven3.8.1"
+    }
+ 	stages
+		{
+            stage("Git Clone")
+			{
+                steps
+				{
+                    git branch: 'development', credentialsId: 'GitHub', url: 'https://github.com/Magheswari/maven-web-application.git'
+                }
+            }
+            stage("Build Package")
+			{
+                steps
+				{
+                    sh "mvn clean package"
+                }
+            }
+			stage('ExecuteSonarQubeReport')
+			{
+				steps
+				{
+					sh "mvn clean sonar:sonar"
+	  			}
+			}
+	        stage('UploadArtifactIntoNexus')
+			{
+				steps
+				{
+					sh "mvn clean deploy"
+				}
+			}
+		    stage('DeployAppIntoTomcatServer')
+			{
+				steps
+				{
+					sshagent(['8c432626-54ac-47e3-95fd-a81c28169e52'])
+					{
+						sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@15.207.99.218:/opt/apache-tomcat-9.0.46/webapps/"
+					} 
+				}
+			
+			}
+		    
+		}	
+}
